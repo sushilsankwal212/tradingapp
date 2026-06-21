@@ -4,352 +4,114 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BTC + GOLD SIGNAL PRO</title>
-
 <style>
-body{
-background:#07111f;
-color:white;
-font-family:Arial,sans-serif;
-padding:15px;
-}
-
-h1{
-text-align:center;
-}
-
-.card{
-background:#0f172a;
-border-radius:18px;
-padding:18px;
-margin-bottom:20px;
-box-shadow:0 0 15px rgba(0,0,0,.3);
-}
-
-.price{
-font-size:42px;
-font-weight:bold;
-color:#38bdf8;
-margin:10px 0;
-}
-
-.signal{
-padding:14px;
-border-radius:12px;
-text-align:center;
-font-size:28px;
-font-weight:bold;
-margin:15px 0;
-}
-
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px;
-}
-
-.box{
-background:#1e293b;
-padding:12px;
-border-radius:12px;
-}
-
-.small{
-font-size:13px;
-color:#94a3b8;
-}
-
-.big{
-font-size:22px;
-font-weight:bold;
-}
+body{background:#07111f;color:white;font-family:Arial,sans-serif;padding:15px}
+h1{text-align:center}
+.card{background:#0f172a;border-radius:18px;padding:18px;margin-bottom:20px;box-shadow:0 0 15px rgba(0,0,0,.3)}
+.price{font-size:42px;font-weight:bold;margin:10px 0}
+.signal{padding:14px;border-radius:12px;text-align:center;font-size:28px;font-weight:bold;margin:15px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.box{background:#1e293b;padding:12px;border-radius:12px}
+.small{font-size:13px;color:#94a3b8}
+.big{font-size:22px;font-weight:bold}
 </style>
 </head>
-
 <body>
 
 <h1>BTC + GOLD SIGNAL PRO</h1>
+<p>Replace API_KEY with your TwelveData key.</p>
 
 <div class="card">
 <h2>BTC/USD</h2>
-
 <div id="btcPrice" class="price">Loading...</div>
-
-<div id="btcSignal" class="signal">
-WAIT
-</div>
-
+<div id="btcSignal" class="signal">WAIT</div>
 <div class="grid">
-
-<div class="box">
-<div class="small">EMA20</div>
-<div id="btcE20" class="big">--</div>
-</div>
-
-<div class="box">
-<div class="small">EMA50</div>
-<div id="btcE50" class="big">--</div>
-</div>
-
-<div class="box">
-<div class="small">RSI</div>
-<div id="btcRsi" class="big">--</div>
-</div>
-
-<div class="box">
-<div class="small">Trend</div>
-<div id="btcTrend" class="big">--</div>
-</div>
-
+<div class="box"><div class="small">EMA20</div><div id="btcE20" class="big">--</div></div>
+<div class="box"><div class="small">EMA50</div><div id="btcE50" class="big">--</div></div>
+<div class="box"><div class="small">RSI</div><div id="btcRsi" class="big">--</div></div>
+<div class="box"><div class="small">Trend</div><div id="btcTrend" class="big">--</div></div>
 </div>
 </div>
 
 <div class="card">
 <h2>XAU/USD (Gold)</h2>
-
 <div id="goldPrice" class="price">Loading...</div>
-
-<div id="goldSignal" class="signal">
-WAIT
-</div>
-
+<div id="goldSignal" class="signal">WAIT</div>
 <div class="grid">
-
-<div class="box">
-<div class="small">EMA20</div>
-<div id="goldE20" class="big">--</div>
-</div>
-
-<div class="box">
-<div class="small">EMA50</div>
-<div id="goldE50" class="big">--</div>
-</div>
-
-<div class="box">
-<div class="small">RSI</div>
-<div id="goldRsi" class="big">--</div>
-</div>
-
-<div class="box">
-<div class="small">Trend</div>
-<div id="goldTrend" class="big">--</div>
-</div>
-
+<div class="box"><div class="small">EMA20</div><div id="goldE20" class="big">--</div></div>
+<div class="box"><div class="small">EMA50</div><div id="goldE50" class="big">--</div></div>
+<div class="box"><div class="small">RSI</div><div id="goldRsi" class="big">--</div></div>
+<div class="box"><div class="small">Trend</div><div id="goldTrend" class="big">--</div></div>
 </div>
 </div>
 
 <script>
+const API_KEY="650be9347bb14529a7609626174ddb0a";
 
-const API_KEY = "650be9347bb14529a7609626174ddb0a";
-
-function ema(data, period){
-
-let k = 2 / (period + 1);
-let emaVal = data[0];
-
-for(let i=1;i<data.length;i++){
-emaVal = data[i] * k + emaVal * (1-k);
+function ema(data,p){let k=2/(p+1),v=data[0];for(let i=1;i<data.length;i++)v=data[i]*k+v*(1-k);return v;}
+function rsi(prices,period=14){
+ let gains=0,losses=0;
+ for(let i=prices.length-period;i<prices.length;i++){
+  let d=prices[i]-prices[i-1];
+  if(d>0) gains+=d; else losses+=Math.abs(d);
+ }
+ if(losses===0) return 100;
+ let rs=gains/losses;
+ return 100-(100/(1+rs));
 }
 
-return emaVal;
+function applySignal(el,trendEl,price,e20,e50,r){
+ let signal="WAIT", trend="SIDEWAYS";
+ if(price>e20 && e20>e50 && r>55 && r<75){signal="BUY";trend="BULLISH";}
+ else if(price>e20 && e20>e50 && r>=75){signal="STRONG BUY";trend="BULLISH";}
+ else if(price<e20 && e20<e50 && r<45 && r>25){signal="SELL";trend="BEARISH";}
+ else if(price<e20 && e20<e50 && r<=25){signal="STRONG SELL";trend="BEARISH";}
+
+ el.innerText=signal;
+ trendEl.innerText=trend;
+
+ if(signal.includes("BUY")){el.style.background="green";}
+ else if(signal.includes("SELL")){el.style.background="crimson";}
+ else{el.style.background="orange";}
 }
 
-function rsi(prices, period=14){
+async function loadSymbol(symbol,ids){
+ try{
+  const url=`https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1min&outputsize=100&apikey=${API_KEY}`;
+  const res=await fetch(url);
+  const data=await res.json();
 
-let gains=0;
-let losses=0;
+  if(!data.values) throw new Error("API Error");
 
-for(let i=prices.length-period;i<prices.length;i++){
+  const closes=data.values.reverse().map(v=>parseFloat(v.close));
+  const price=closes[closes.length-1];
+  const e20=ema(closes,20);
+  const e50=ema(closes,50);
+  const r=rsi(closes);
 
-let diff = prices[i] - prices[i-1];
+  document.getElementById(ids.price).innerText="$"+price.toFixed(2);
+  document.getElementById(ids.e20).innerText=e20.toFixed(2);
+  document.getElementById(ids.e50).innerText=e50.toFixed(2);
+  document.getElementById(ids.rsi).innerText=r.toFixed(1);
 
-if(diff > 0)
-gains += diff;
-else
-losses += Math.abs(diff);
-}
-
-if(losses===0)
-return 100;
-
-let rs = gains / losses;
-
-return 100 - (100/(1+rs));
-}
-
-function applySignal(signalEl, trendEl, e20, e50, rsiVal){
-
-let signal="WAIT";
-let trend="SIDEWAYS";
-
-if(e20 > e50){
-
-trend="BULLISH";
-
-if(rsiVal > 65)
-signal="STRONG BUY";
-else if(rsiVal > 55)
-signal="BUY";
-else
-signal="WAIT";
-}
-
-else if(e20 < e50){
-
-trend="BEARISH";
-
-if(rsiVal < 35)
-signal="STRONG SELL";
-else if(rsiVal < 45)
-signal="SELL";
-else
-signal="WAIT";
-}
-
-signalEl.innerText = signal;
-trendEl.innerText = trend;
-
-if(signal.includes("BUY")){
-
-signalEl.style.background="#22c55e";
-signalEl.style.color="#000";
-
-}
-else if(signal.includes("SELL")){
-
-signalEl.style.background="#ef4444";
-signalEl.style.color="#fff";
-
-}
-else{
-
-signalEl.style.background="#f59e0b";
-signalEl.style.color="#000";
-
-}
-}
-
-async function loadSymbol(symbol, ids){
-
-try{
-
-const url =
-`https://api.twelvedata.com/time_series?symbol=${symbol}&interval=15min&outputsize=100&apikey=${API_KEY}`;
-
-const response = await fetch(url);
-
-const data = await response.json();
-
-if(!data.values)
-throw new Error("No data");
-
-const lastBar =
-new Date(data.values[0].datetime);
-
-const now = new Date();
-
-const diff =
-(now-lastBar)/60000;
-
-if(symbol.includes("XAU") && diff > 120){
-
-document.getElementById(ids.signal).innerText =
-"MARKET CLOSED";
-
-document.getElementById(ids.signal).style.background =
-"#6b7280";
-
-return;
-}
-
-const closes =
-data.values
-.reverse()
-.map(x=>parseFloat(x.close));
-
-const price =
-closes[closes.length-1];
-
-const ema20 =
-ema(closes,20);
-
-const ema50 =
-ema(closes,50);
-
-const rsiValue =
-rsi(closes);
-
-document.getElementById(ids.price)
-.innerText =
-"$"+price.toFixed(2);
-
-document.getElementById(ids.e20)
-.innerText =
-ema20.toFixed(2);
-
-document.getElementById(ids.e50)
-.innerText =
-ema50.toFixed(2);
-
-document.getElementById(ids.rsi)
-.innerText =
-rsiValue.toFixed(1);
-
-applySignal(
-document.getElementById(ids.signal),
-document.getElementById(ids.trend),
-ema20,
-ema50,
-rsiValue
-);
-
-}
-catch(err){
-
-console.log(err);
-
-document.getElementById(ids.price)
-.innerText =
-"API ERROR";
-
-}
+  applySignal(
+   document.getElementById(ids.signal),
+   document.getElementById(ids.trend),
+   price,e20,e50,r
+  );
+ }catch(e){
+  document.getElementById(ids.price).innerText="API ERROR";
+ }
 }
 
 function refresh(){
-
-loadSymbol(
-"BTC/USD",
-{
-price:"btcPrice",
-signal:"btcSignal",
-e20:"btcE20",
-e50:"btcE50",
-rsi:"btcRsi",
-trend:"btcTrend"
-}
-);
-
-loadSymbol(
-"XAU/USD",
-{
-price:"goldPrice",
-signal:"goldSignal",
-e20:"goldE20",
-e50:"goldE50",
-rsi:"goldRsi",
-trend:"goldTrend"
-}
-);
-
+ loadSymbol("BTC/USD",{price:"btcPrice",signal:"btcSignal",e20:"btcE20",e50:"btcE50",rsi:"btcRsi",trend:"btcTrend"});
+ loadSymbol("XAU/USD",{price:"goldPrice",signal:"goldSignal",e20:"goldE20",e50:"goldE50",rsi:"goldRsi",trend:"goldTrend"});
 }
 
 refresh();
-
-setInterval(
-refresh,
-30000
-);
-
+setInterval(refresh,10000);
 </script>
-
 </body>
 </html>
+..
