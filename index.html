@@ -210,36 +210,26 @@ Auto Refresh Every 5 Seconds
 
 <script>
 
-let lastSignal = "";
+let lastSignal="";
 
 function speak(text){
-
 speechSynthesis.cancel();
-
-const msg = new SpeechSynthesisUtterance(text);
-
-msg.lang = "en-US";
-
+const msg=new SpeechSynthesisUtterance(text);
+msg.lang="en-US";
 speechSynthesis.speak(msg);
-
 }
 
 function testVoice(){
-
 speak("Gold signal assistant ready.");
-
 }
 
 function calculateEMA(prices,period){
 
-const multiplier = 2/(period+1);
-
-let ema = prices[0];
+const multiplier=2/(period+1);
+let ema=prices[0];
 
 for(let i=1;i<prices.length;i++){
-
 ema=((prices[i]-ema)*multiplier)+ema;
-
 }
 
 return ema;
@@ -250,22 +240,27 @@ async function loadData(){
 
 try{
 
-// Yahoo Finance Gold CFD
-const response = await fetch(
-"https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=15m&range=5d"
+const response=await fetch(
+"https://api.twelvedata.com/time_series?symbol=XAU/USD&interval=15min&outputsize=100&apikey=650be9347bb14529a7609626174ddb0a"
 );
 
-const result = await response.json();
+const result=await response.json();
 
-const closes = result.chart.result[0].indicators.quote[0].close.filter(v=>v);
+if(!result.values){
+throw new Error("No Data");
+}
 
-const price = closes[closes.length-1];
+const closes=result.values
+.reverse()
+.map(x=>parseFloat(x.close));
 
-const ema20 = calculateEMA(closes.slice(-20),20);
+const price=closes[closes.length-1];
 
-const ema50 = calculateEMA(closes.slice(-50),50);
+const ema20=calculateEMA(closes.slice(-20),20);
+const ema50=calculateEMA(closes.slice(-50),50);
 
-document.getElementById("price").innerHTML="$"+price.toFixed(2);
+document.getElementById("price").innerHTML=
+"$"+price.toFixed(2);
 
 document.getElementById("time").innerHTML=
 "Updated : "+new Date().toLocaleTimeString();
@@ -314,28 +309,23 @@ box.innerHTML="🟡 WAIT";
 
 }
 
-document.getElementById("confidence").innerHTML=confidence;
+document.getElementById("confidence").innerHTML=
+confidence;
 
 if(signal!==lastSignal){
 
 if(signal==="BUY"){
-
 speak("Buy Gold now");
 navigator.vibrate(300);
-
 }
 
 if(signal==="SELL"){
-
 speak("Sell Gold now");
 navigator.vibrate(300);
-
 }
 
 if(signal==="WAIT"){
-
 speak("Wait for confirmation");
-
 }
 
 lastSignal=signal;
@@ -372,7 +362,8 @@ document.getElementById("tp").innerHTML=
 }
 catch(err){
 
-document.getElementById("price").innerHTML="Data Error";
+document.getElementById("price").innerHTML=
+"Data Error";
 
 console.log(err);
 
