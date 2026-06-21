@@ -3,115 +3,388 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BTC + GOLD SIGNAL PRO</title>
+<title>GOLD Signal Pro</title>
+
 <style>
-body{background:#07111f;color:white;font-family:Arial,sans-serif;padding:15px}
-h1{text-align:center}
-.card{background:#0f172a;border-radius:18px;padding:18px;margin-bottom:20px;box-shadow:0 0 15px rgba(0,0,0,.3)}
-.price{font-size:42px;font-weight:bold;margin:10px 0}
-.signal{padding:14px;border-radius:12px;text-align:center;font-size:28px;font-weight:bold;margin:15px 0}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.box{background:#1e293b;padding:12px;border-radius:12px}
-.small{font-size:13px;color:#94a3b8}
-.big{font-size:22px;font-weight:bold}
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#030712;
+color:white;
+padding:15px;
+}
+
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:15px;
+}
+
+.logo{
+font-size:28px;
+font-weight:bold;
+color:#FFD700;
+}
+
+.live{
+color:#22C55E;
+font-size:14px;
+}
+
+.card{
+background:#111827;
+border-radius:25px;
+padding:20px;
+margin-bottom:15px;
+}
+
+.price{
+font-size:52px;
+font-weight:bold;
+}
+
+.time{
+margin-top:10px;
+color:#9CA3AF;
+}
+
+.signal{
+text-align:center;
+padding:25px;
+border-radius:20px;
+font-size:42px;
+font-weight:bold;
+margin-bottom:15px;
+}
+
+.buy{
+background:#22C55E;
+color:black;
+}
+
+.sell{
+background:#EF4444;
+}
+
+.wait{
+background:#F59E0B;
+color:black;
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+margin-top:15px;
+}
+
+.small{
+background:#111827;
+padding:18px;
+border-radius:18px;
+}
+
+.label{
+font-size:13px;
+color:#9CA3AF;
+margin-bottom:8px;
+}
+
+.value{
+font-size:24px;
+font-weight:bold;
+}
+
+.trade{
+display:grid;
+grid-template-columns:1fr 1fr 1fr;
+gap:10px;
+margin-top:15px;
+}
+
+.entry{
+border:1px solid #374151;
+}
+
+.sl{
+border:1px solid #EF4444;
+}
+
+.tp{
+border:1px solid #22C55E;
+}
+
+button{
+width:100%;
+padding:16px;
+margin-top:15px;
+border:none;
+border-radius:15px;
+font-size:18px;
+font-weight:bold;
+background:#2563EB;
+color:white;
+}
+
+.footer{
+text-align:center;
+margin-top:15px;
+color:#6B7280;
+}
 </style>
 </head>
 <body>
 
-<h1>BTC + GOLD SIGNAL PRO</h1>
-<p>Replace API_KEY with your TwelveData key.</p>
-
-<div class="card">
-<h2>BTC/USD</h2>
-<div id="btcPrice" class="price">Loading...</div>
-<div id="btcSignal" class="signal">WAIT</div>
-<div class="grid">
-<div class="box"><div class="small">EMA20</div><div id="btcE20" class="big">--</div></div>
-<div class="box"><div class="small">EMA50</div><div id="btcE50" class="big">--</div></div>
-<div class="box"><div class="small">RSI</div><div id="btcRsi" class="big">--</div></div>
-<div class="box"><div class="small">Trend</div><div id="btcTrend" class="big">--</div></div>
+<div class="header">
+<div>
+<div class="logo">🟡 GOLD Signal Pro</div>
+<div class="live">🟢 Live</div>
 </div>
 </div>
 
 <div class="card">
-<h2>XAU/USD (Gold)</h2>
-<div id="goldPrice" class="price">Loading...</div>
-<div id="goldSignal" class="signal">WAIT</div>
-<div class="grid">
-<div class="box"><div class="small">EMA20</div><div id="goldE20" class="big">--</div></div>
-<div class="box"><div class="small">EMA50</div><div id="goldE50" class="big">--</div></div>
-<div class="box"><div class="small">RSI</div><div id="goldRsi" class="big">--</div></div>
-<div class="box"><div class="small">Trend</div><div id="goldTrend" class="big">--</div></div>
+<div class="price" id="price">$--</div>
+<div class="time" id="time">Loading...</div>
 </div>
+
+<div id="signalBox" class="signal wait">
+WAIT
+</div>
+
+<div class="grid">
+
+<div class="small">
+<div class="label">EMA20</div>
+<div class="value" id="ema20">--</div>
+</div>
+
+<div class="small">
+<div class="label">EMA50</div>
+<div class="value" id="ema50">--</div>
+</div>
+
+<div class="small">
+<div class="label">ENTRY</div>
+<div class="value" id="entry">--</div>
+</div>
+
+<div class="small">
+<div class="label">CONFIDENCE</div>
+<div class="value" id="confidence">50%</div>
+</div>
+
+</div>
+
+<div class="trade">
+
+<div class="small entry">
+<div class="label">ENTRY</div>
+<div class="value" id="entry2">--</div>
+</div>
+
+<div class="small sl">
+<div class="label">STOP LOSS</div>
+<div class="value" id="sl">--</div>
+</div>
+
+<div class="small tp">
+<div class="label">TAKE PROFIT</div>
+<div class="value" id="tp">--</div>
+</div>
+
+</div>
+
+<button onclick="testVoice()">
+🔊 Test Voice
+</button>
+
+<div class="footer">
+Auto Refresh Every 5 Seconds
 </div>
 
 <script>
-const API_KEY="650be9347bb14529a7609626174ddb0a";
 
-function ema(data,p){let k=2/(p+1),v=data[0];for(let i=1;i<data.length;i++)v=data[i]*k+v*(1-k);return v;}
-function rsi(prices,period=14){
- let gains=0,losses=0;
- for(let i=prices.length-period;i<prices.length;i++){
-  let d=prices[i]-prices[i-1];
-  if(d>0) gains+=d; else losses+=Math.abs(d);
- }
- if(losses===0) return 100;
- let rs=gains/losses;
- return 100-(100/(1+rs));
+let lastSignal = "";
+
+function speak(text){
+
+speechSynthesis.cancel();
+
+const msg = new SpeechSynthesisUtterance(text);
+
+msg.lang = "en-US";
+
+speechSynthesis.speak(msg);
+
 }
 
-function applySignal(el,trendEl,price,e20,e50,r){
- let signal="WAIT", trend="SIDEWAYS";
- if(price>e20 && e20>e50 && r>55 && r<75){signal="BUY";trend="BULLISH";}
- else if(price>e20 && e20>e50 && r>=75){signal="STRONG BUY";trend="BULLISH";}
- else if(price<e20 && e20<e50 && r<45 && r>25){signal="SELL";trend="BEARISH";}
- else if(price<e20 && e20<e50 && r<=25){signal="STRONG SELL";trend="BEARISH";}
+function testVoice(){
 
- el.innerText=signal;
- trendEl.innerText=trend;
+speak("Gold signal assistant ready.");
 
- if(signal.includes("BUY")){el.style.background="green";}
- else if(signal.includes("SELL")){el.style.background="crimson";}
- else{el.style.background="orange";}
 }
 
-async function loadSymbol(symbol,ids){
- try{
-  const url=`https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1min&outputsize=100&apikey=${API_KEY}`;
-  const res=await fetch(url);
-  const data=await res.json();
+function calculateEMA(prices,period){
 
-  if(!data.values) throw new Error("API Error");
+const multiplier = 2/(period+1);
 
-  const closes=data.values.reverse().map(v=>parseFloat(v.close));
-  const price=closes[closes.length-1];
-  const e20=ema(closes,20);
-  const e50=ema(closes,50);
-  const r=rsi(closes);
+let ema = prices[0];
 
-  document.getElementById(ids.price).innerText="$"+price.toFixed(2);
-  document.getElementById(ids.e20).innerText=e20.toFixed(2);
-  document.getElementById(ids.e50).innerText=e50.toFixed(2);
-  document.getElementById(ids.rsi).innerText=r.toFixed(1);
+for(let i=1;i<prices.length;i++){
 
-  applySignal(
-   document.getElementById(ids.signal),
-   document.getElementById(ids.trend),
-   price,e20,e50,r
-  );
- }catch(e){
-  document.getElementById(ids.price).innerText="API ERROR";
- }
+ema=((prices[i]-ema)*multiplier)+ema;
+
 }
 
-function refresh(){
- loadSymbol("BTC/USD",{price:"btcPrice",signal:"btcSignal",e20:"btcE20",e50:"btcE50",rsi:"btcRsi",trend:"btcTrend"});
- loadSymbol("XAU/USD",{price:"goldPrice",signal:"goldSignal",e20:"goldE20",e50:"goldE50",rsi:"goldRsi",trend:"goldTrend"});
+return ema;
+
 }
 
-refresh();
-setInterval(refresh,10000);
+async function loadData(){
+
+try{
+
+// Yahoo Finance Gold CFD
+const response = await fetch(
+"https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=15m&range=5d"
+);
+
+const result = await response.json();
+
+const closes = result.chart.result[0].indicators.quote[0].close.filter(v=>v);
+
+const price = closes[closes.length-1];
+
+const ema20 = calculateEMA(closes.slice(-20),20);
+
+const ema50 = calculateEMA(closes.slice(-50),50);
+
+document.getElementById("price").innerHTML="$"+price.toFixed(2);
+
+document.getElementById("time").innerHTML=
+"Updated : "+new Date().toLocaleTimeString();
+
+document.getElementById("ema20").innerHTML=
+ema20.toFixed(2);
+
+document.getElementById("ema50").innerHTML=
+ema50.toFixed(2);
+
+document.getElementById("entry").innerHTML=
+price.toFixed(2);
+
+document.getElementById("entry2").innerHTML=
+price.toFixed(2);
+
+let signal="WAIT";
+let confidence="50%";
+
+const box=document.getElementById("signalBox");
+
+if(ema20>ema50){
+
+signal="BUY";
+confidence="78%";
+
+box.className="signal buy";
+box.innerHTML="🟢 BUY";
+
+}
+else if(ema20<ema50){
+
+signal="SELL";
+confidence="78%";
+
+box.className="signal sell";
+box.innerHTML="🔴 SELL";
+
+}
+else{
+
+signal="WAIT";
+
+box.className="signal wait";
+box.innerHTML="🟡 WAIT";
+
+}
+
+document.getElementById("confidence").innerHTML=confidence;
+
+if(signal!==lastSignal){
+
+if(signal==="BUY"){
+
+speak("Buy Gold now");
+navigator.vibrate(300);
+
+}
+
+if(signal==="SELL"){
+
+speak("Sell Gold now");
+navigator.vibrate(300);
+
+}
+
+if(signal==="WAIT"){
+
+speak("Wait for confirmation");
+
+}
+
+lastSignal=signal;
+
+}
+
+let sl,tp;
+
+if(signal==="BUY"){
+
+sl=price*0.995;
+tp=price*1.01;
+
+}
+else if(signal==="SELL"){
+
+sl=price*1.005;
+tp=price*0.99;
+
+}
+else{
+
+sl=0;
+tp=0;
+
+}
+
+document.getElementById("sl").innerHTML=
+"$"+sl.toFixed(2);
+
+document.getElementById("tp").innerHTML=
+"$"+tp.toFixed(2);
+
+}
+catch(err){
+
+document.getElementById("price").innerHTML="Data Error";
+
+console.log(err);
+
+}
+
+}
+
+loadData();
+
+setInterval(loadData,5000);
+
 </script>
+
 </body>
 </html>
-..
