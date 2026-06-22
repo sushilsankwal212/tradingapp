@@ -1,379 +1,278 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GOLD Signal Pro</title>
+  <title>SMC PRO AI ENGINE V3</title>
 
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
+  <style>
+    body {
+      background: #0a0f1f;
+      color: white;
+      font-family: Arial;
+      text-align: center;
+    }
 
-body{
-background:#030712;
-color:white;
-padding:15px;
-}
+    .box {
+      width: 420px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #121a2b;
+      border-radius: 12px;
+    }
 
-.header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:15px;
-}
+    .signal {
+      font-size: 24px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
 
-.logo{
-font-size:28px;
-font-weight:bold;
-color:#FFD700;
-}
+    .STRONG_BUY { color:#00ff88; }
+    .WEAK_BUY { color:#b6ff4d; }
+    .NEUTRAL { color:#ffd000; }
+    .WEAK_SELL { color:#ff8c42; }
+    .STRONG_SELL { color:#ff2e2e; }
 
-.live{
-color:#22C55E;
-font-size:14px;
-}
+    button {
+      padding:10px 20px;
+      margin:10px;
+      border:none;
+      border-radius:8px;
+      cursor:pointer;
+    }
 
-.card{
-background:#111827;
-border-radius:25px;
-padding:20px;
-margin-bottom:15px;
-}
-
-.price{
-font-size:52px;
-font-weight:bold;
-}
-
-.time{
-margin-top:10px;
-color:#9CA3AF;
-}
-
-.signal{
-text-align:center;
-padding:25px;
-border-radius:20px;
-font-size:42px;
-font-weight:bold;
-margin-bottom:15px;
-}
-
-.buy{
-background:#22C55E;
-color:black;
-}
-
-.sell{
-background:#EF4444;
-}
-
-.wait{
-background:#F59E0B;
-color:black;
-}
-
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px;
-margin-top:15px;
-}
-
-.small{
-background:#111827;
-padding:18px;
-border-radius:18px;
-}
-
-.label{
-font-size:13px;
-color:#9CA3AF;
-margin-bottom:8px;
-}
-
-.value{
-font-size:24px;
-font-weight:bold;
-}
-
-.trade{
-display:grid;
-grid-template-columns:1fr 1fr 1fr;
-gap:10px;
-margin-top:15px;
-}
-
-.entry{
-border:1px solid #374151;
-}
-
-.sl{
-border:1px solid #EF4444;
-}
-
-.tp{
-border:1px solid #22C55E;
-}
-
-button{
-width:100%;
-padding:16px;
-margin-top:15px;
-border:none;
-border-radius:15px;
-font-size:18px;
-font-weight:bold;
-background:#2563EB;
-color:white;
-}
-
-.footer{
-text-align:center;
-margin-top:15px;
-color:#6B7280;
-}
-</style>
+    .status {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-top: 5px;
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="header">
-<div>
-<div class="logo">🟡 GOLD Signal Pro</div>
-<div class="live">🟢 Live</div>
-</div>
-</div>
+<h1> SMC PRO AI ENGINE V3</h1>
 
-<div class="card">
-<div class="price" id="price">$--</div>
-<div class="time" id="time">Loading...</div>
+<button onclick="enableVoice()">ENABLE VOICE</button>
+
+<div class="box">
+  <h2>BTCUSDT</h2>
+  <div id="btc">Loading...</div>
 </div>
 
-<div id="signalBox" class="signal wait">
-WAIT
+<div class="box">
+  <h2>XAUUSD</h2>
+  <div id="gold">Loading...</div>
 </div>
 
-<div class="grid">
-
-<div class="small">
-<div class="label">EMA20</div>
-<div class="value" id="ema20">--</div>
-</div>
-
-<div class="small">
-<div class="label">EMA50</div>
-<div class="value" id="ema50">--</div>
-</div>
-
-<div class="small">
-<div class="label">ENTRY</div>
-<div class="value" id="entry">--</div>
-</div>
-
-<div class="small">
-<div class="label">CONFIDENCE</div>
-<div class="value" id="confidence">50%</div>
-</div>
-
-</div>
-
-<div class="trade">
-
-<div class="small entry">
-<div class="label">ENTRY</div>
-<div class="value" id="entry2">--</div>
-</div>
-
-<div class="small sl">
-<div class="label">STOP LOSS</div>
-<div class="value" id="sl">--</div>
-</div>
-
-<div class="small tp">
-<div class="label">TAKE PROFIT</div>
-<div class="value" id="tp">--</div>
-</div>
-
-</div>
-
-<button onclick="testVoice()">
-🔊 Test Voice
-</button>
-
-<div class="footer">
-Auto Refresh Every 5 Seconds
+<div class="box">
+  <h2>NEWS</h2>
+  <div id="news">Loading...</div>
 </div>
 
 <script>
 
-let lastSignal="";
+const API_KEY = "650be9347bb14529a7609626174ddb0a";
+let voiceEnabled = false;
+let lastSpeak = "";
+
+// ---------------- VOICE ----------------
+function enableVoice(){
+  voiceEnabled = true;
+  speechSynthesis.speak(new SpeechSynthesisUtterance("Voice enabled"));
+}
 
 function speak(text){
-speechSynthesis.cancel();
-const msg=new SpeechSynthesisUtterance(text);
-msg.lang="en-US";
-speechSynthesis.speak(msg);
+  if(!voiceEnabled) return;
+  if(text === lastSpeak) return;
+  lastSpeak = text;
+
+  let msg = new SpeechSynthesisUtterance(text);
+  msg.rate = 1;
+  msg.lang = "en-US";
+  speechSynthesis.speak(msg);
 }
 
-function testVoice(){
-speak("Gold signal assistant ready.");
+// ---------------- INDICATORS ----------------
+function EMA(data,p){
+  let k=2/(p+1), ema=data[0];
+  for(let i=1;i<data.length;i++) ema=data[i]*k+ema*(1-k);
+  return ema;
 }
 
-function calculateEMA(prices,period){
-
-const multiplier=2/(period+1);
-let ema=prices[0];
-
-for(let i=1;i<prices.length;i++){
-ema=((prices[i]-ema)*multiplier)+ema;
+function RSI(data){
+  let g=0,l=0;
+  for(let i=1;i<data.length;i++){
+    let d=data[i]-data[i-1];
+    d>=0?g+=d:l+=Math.abs(d);
+  }
+  let rs=g/(l||1);
+  return 100-(100/(1+rs));
 }
 
-return ema;
-
+function MACD(data){
+  return EMA(data.slice(-12),12)-EMA(data.slice(-26),26);
 }
 
-async function loadData(){
+// ---------------- NEWS ----------------
+function analyzeNews(text){
+  text=text.toLowerCase();
+  let score=0;
 
-try{
+  if(text.includes("crash")||text.includes("war")||text.includes("inflation")) score-=2;
+  if(text.includes("hack")||text.includes("ban")) score-=1;
 
-const response=await fetch(
-"https://api.twelvedata.com/time_series?symbol=XAU/USD&interval=15min&outputsize=100&apikey=650be9347bb14529a7609626174ddb0a"
-);
+  if(text.includes("bull")||text.includes("surge")||text.includes("rise")) score+=2;
+  if(text.includes("etf")||text.includes("adoption")) score+=1;
 
-const result=await response.json();
-
-if(!result.values){
-throw new Error("No Data");
+  return score;
 }
 
-const closes=result.values
-.reverse()
-.map(x=>parseFloat(x.close));
+// ---------------- SIGNAL ENGINE ----------------
+function signalEngine(rsi,emaF,emaS,macd,news){
 
-const price=closes[closes.length-1];
+  let score=0;
 
-const ema20=calculateEMA(closes.slice(-20),20);
-const ema50=calculateEMA(closes.slice(-50),50);
+  if(emaF>emaS) score+=1;
+  else score-=1;
 
-document.getElementById("price").innerHTML=
-"$"+price.toFixed(2);
+  if(macd>0) score+=1;
+  else score-=1;
 
-document.getElementById("time").innerHTML=
-"Updated : "+new Date().toLocaleTimeString();
+  if(rsi<30) score+=2;
+  if(rsi>70) score-=2;
 
-document.getElementById("ema20").innerHTML=
-ema20.toFixed(2);
+  score+=news;
 
-document.getElementById("ema50").innerHTML=
-ema50.toFixed(2);
-
-document.getElementById("entry").innerHTML=
-price.toFixed(2);
-
-document.getElementById("entry2").innerHTML=
-price.toFixed(2);
-
-let signal="WAIT";
-let confidence="50%";
-
-const box=document.getElementById("signalBox");
-
-if(ema20>ema50){
-
-signal="BUY";
-confidence="78%";
-
-box.className="signal buy";
-box.innerHTML="🟢 BUY";
-
-}
-else if(ema20<ema50){
-
-signal="SELL";
-confidence="78%";
-
-box.className="signal sell";
-box.innerHTML="🔴 SELL";
-
-}
-else{
-
-signal="WAIT";
-
-box.className="signal wait";
-box.innerHTML="🟡 WAIT";
-
+  if(score>=4) return "STRONG_BUY";
+  if(score>=2) return "WEAK_BUY";
+  if(score>=0) return "NEUTRAL";
+  if(score>=-2) return "WEAK_SELL";
+  return "STRONG_SELL";
 }
 
-document.getElementById("confidence").innerHTML=
-confidence;
+// ---------------- LEVELS ----------------
+function calcLevels(price, signal){
+  let slPerc = 0.015;
+  let tpPerc = 0.03;
 
-if(signal!==lastSignal){
+  let entry = price;
+  let sl, tp;
 
-if(signal==="BUY"){
-speak("Buy Gold now");
-navigator.vibrate(300);
+  if(signal.includes("BUY")){
+    sl = entry * (1 - slPerc);
+    tp = entry * (1 + tpPerc);
+  } else if(signal.includes("SELL")){
+    sl = entry * (1 + slPerc);
+    tp = entry * (1 - tpPerc);
+  } else {
+    sl = entry;
+    tp = entry;
+  }
+
+  return {entry, sl, tp};
 }
 
-if(signal==="SELL"){
-speak("Sell Gold now");
-navigator.vibrate(300);
+// ---------------- TREND ----------------
+function getTrend(emaF, emaS){
+  if(emaF > emaS * 1.001) return "UP TREND";
+  if(emaF < emaS * 0.999) return "DOWN TREND";
+  return "SIDEWAYS";
 }
 
-if(signal==="WAIT"){
-speak("Wait for confirmation");
+// ---------------- FETCH DATA ----------------
+async function getData(symbol){
+  let url=`https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1min&outputsize=50&apikey=${API_KEY}`;
+  let res=await fetch(url);
+  let json=await res.json();
+  return json.values.map(v=>parseFloat(v.close)).reverse();
 }
 
-lastSignal=signal;
+// ---------------- BTC ----------------
+async function btc(newsScore){
 
+  let closes=await getData("BTC/USD");
+
+  let price = closes[closes.length - 1];
+
+  let rsi=RSI(closes);
+  let emaF=EMA(closes.slice(-10),10);
+  let emaS=EMA(closes.slice(-20),20);
+  let macd=MACD(closes);
+
+  let signal=signalEngine(rsi,emaF,emaS,macd,newsScore.btc);
+  let levels=calcLevels(price,signal);
+  let trend=getTrend(emaF,emaS);
+
+  document.getElementById("btc").innerHTML=
+  `<div class="status">Price: ${price.toFixed(2)}</div>
+   <div class="status">${trend}</div>
+   <div class="signal ${signal}">${signal}</div>
+   RSI:${rsi.toFixed(1)} MACD:${macd.toFixed(2)}<br>
+   Entry: ${levels.entry.toFixed(2)}<br>
+   SL: ${levels.sl.toFixed(2)}<br>
+   TP: ${levels.tp.toFixed(2)}`;
+
+  speak("BTC " + signal);
 }
 
-let sl,tp;
+// ---------------- GOLD ----------------
+async function gold(newsScore){
 
-if(signal==="BUY"){
+  let closes=await getData("XAU/USD");
 
-sl=price*0.995;
-tp=price*1.01;
+  let price = closes[closes.length - 1];
 
-}
-else if(signal==="SELL"){
+  let rsi=RSI(closes);
+  let emaF=EMA(closes.slice(-10),10);
+  let emaS=EMA(closes.slice(-20),20);
+  let macd=MACD(closes);
 
-sl=price*1.005;
-tp=price*0.99;
+  let signal=signalEngine(rsi,emaF,emaS,macd,newsScore.gold);
+  let levels=calcLevels(price,signal);
+  let trend=getTrend(emaF,emaS);
 
-}
-else{
+  document.getElementById("gold").innerHTML=
+  `<div class="status">Price: ${price.toFixed(2)}</div>
+   <div class="status">${trend}</div>
+   <div class="signal ${signal}">${signal}</div>
+   RSI:${rsi.toFixed(1)} MACD:${macd.toFixed(2)}<br>
+   Entry: ${levels.entry.toFixed(2)}<br>
+   SL: ${levels.sl.toFixed(2)}<br>
+   TP: ${levels.tp.toFixed(2)}`;
 
-sl=0;
-tp=0;
-
-}
-
-document.getElementById("sl").innerHTML=
-"$"+sl.toFixed(2);
-
-document.getElementById("tp").innerHTML=
-"$"+tp.toFixed(2);
-
-}
-catch(err){
-
-document.getElementById("price").innerHTML=
-"Data Error";
-
-console.log(err);
-
+  speak("Gold " + signal);
 }
 
+// ---------------- NEWS ----------------
+async function news(){
+
+  let res=await fetch("https://newsapi.org/v2/everything?q=bitcoin OR gold OR inflation&apiKey=cc04c6811bd041cba7ec3a9d51baad92");
+  let json=await res.json();
+
+  let btcScore=0;
+  let goldScore=0;
+
+  json.articles.slice(0,10).forEach(a=>{
+    let t=a.title+" "+a.description;
+
+    if(t.toLowerCase().includes("bitcoin")) btcScore+=analyzeNews(t);
+    if(t.toLowerCase().includes("gold")) goldScore+=analyzeNews(t);
+  });
+
+  document.getElementById("news").innerHTML=
+  `BTC Sentiment: ${btcScore}<br>GOLD Sentiment: ${goldScore}`;
+
+  return {btc:btcScore,gold:goldScore};
 }
 
-loadData();
+// ---------------- RUN ----------------
+async function run(){
+  let newsScore=await news();
+  await btc(newsScore);
+  await gold(newsScore);
+}
 
-setInterval(loadData,5000);
+run();
+setInterval(run,30000);
 
 </script>
 
